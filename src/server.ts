@@ -52,15 +52,13 @@ io.on(
     socket.on("join-room", async (data: JoinRoomDatagram) => {
       console.log(data);
       const ROOM = await _searchForRoom(data.roomID);
-
+      console.log(ROOM);
       if (!ROOM) {
         socket.emit("room-status", { msg: "error" });
         return;
       }
 
       const LinkedList: LinkedList = ROOM.members;
-      console.log("LinkedList:");
-      console.log(LinkedList);
       if (LinkedList.size() > ROOM.maxCapacity) {
         socket.emit("room-status", { msg: "full" });
         return;
@@ -71,35 +69,40 @@ io.on(
         position: data.position,
         username: data.username,
       };
-
       const result: boolean = LinkedList.contains(USER);
-      console.log("\n" + result + "\n");
       if (!result) {
         const result: boolean = LinkedList.add(USER);
-        console.log("\n" + result + "\n");
-
         if (!result) {
           console.log("Error: Could not add member to list.");
           return;
         }
       }
-      console.log("After joining");
+      if (result) LinkedList.update(USER);
+      console.log("\nAfter joining\n");
       console.log(LinkedList);
-      const roomArray = LinkedList.toArray();
-      socket.emit("all-users", { users: roomArray });
+      const roomArray = LinkedList.toArray().filter((User: User) => {
+        return User.id != USER.id;
+      });
+      const position = LinkedList.getByObject(USER)?.position;
       socket.join(ROOM.key);
-      await _updateRoom(ROOM);
+      socket.emit("all-users", { users: roomArray, position: position });
+      _updateRoom(ROOM);
     });
 
-    socket.on("sending-signal", (data: ReceivedSignalDatagram) => {
+    socket.on("sending-signal", async (data: ReceivedSignalDatagram) => {
+      console.log(data);
+      const Room = await _searchForRoom(data.roomID);
+      const roomArr = Room?.members.toArray();
       io.to(data.userToSignal).emit("user-joined", {
         signal: data.signal,
-        socketID: data.socketID,
+        callerID: data.callerID,
+        updatedUserList: roomArr,
       });
     });
 
     socket.on("returning-signal", (data: ReceivedSignalDatagram) => {
-      io.to(data.socketID).emit("receiving-signal", {
+      console.log(data);
+      io.to(data.callerID).emit("receiving-signal", {
         signal: data.signal,
         id: socket.id,
       });
@@ -112,28 +115,20 @@ io.on(
         return;
       }
       const LinkedList = Room.members;
-
+      console.log(LinkedList);
       const findThisUser: User = {
-        id: "",
+        id: socket.id,
         username: data.user.username,
         position: data.user.position,
       };
-
       const result = LinkedList.contains(findThisUser);
       console.log(result);
       if (!result) return;
       io.to(Room.key).emit("chat", { message: data.user.msg, id: socket.id });
-
-      // for (const room in users) {
-      //   for (let i = 0; i < users[room].length; i++) {
-      //     if (socket.id === users[room][i]) {
-      //       io.to(room).emit("chat", { message: data.message, id: socket.id });
-      //     }
-      //   }
-      // }
     });
     // WORK ON LEAVE!!!!
     socket.on("leave", async (data: DisconnectDatagram) => {
+      console.log(data);
       const Room = await _searchForRoom(data.room);
       if (!Room) {
         socket.emit("room-status", { msg: "error" });
@@ -142,11 +137,14 @@ io.on(
       const LinkedList = Room.members;
       if (data.user.id !== socket.id) return;
       LinkedList.remove(data.user);
+      console.log(LinkedList);
       if (LinkedList.size() <= 0) await _deleteRoomFromMemory(Room);
       socket.broadcast.emit("users-left", {
         leaver: socket.id,
       });
     });
+
+    socket.on("disconnect", () => {});
   }
 );
 

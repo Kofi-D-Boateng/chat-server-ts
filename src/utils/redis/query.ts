@@ -13,7 +13,7 @@ const _searchForRoom: (key: string) => Promise<Room | null> = async (
     const r = await redis.GET(key);
     if (!r) throw new Error("Does not exist");
     const ref: Room = await JSON.parse(r);
-    const LL: LinkedList = new LinkedList(ref.members.head);
+    const LL: LinkedList = new LinkedList(ref.members.head, ref.members.length);
     const R = new Room(ref.key, ref.name, ref.maxCapacity, LL);
     return R;
   } catch (error) {
@@ -29,7 +29,7 @@ const _createRoom: (
   // const hashTable = { table: {}, count: 1 };
   const USER: User = { id: "", position: 1, username: request.username };
   const Node: Node = { val: USER, next: null };
-  const LL: LinkedList = new LinkedList(Node);
+  const LL: LinkedList = new LinkedList(Node, 1);
   let roomRef: Room = new Room(key, request.name, request.capacity, LL);
   const HashTable: { capacity: number; table: HashTable<User> } = {
     capacity: request.capacity,
