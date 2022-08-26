@@ -3,6 +3,6 @@ export type MessageDatagram = {
   user: {
     position: number;
     username: string;
-    msg: string;
+    message: string;
   };
 };

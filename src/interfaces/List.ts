@@ -1,5 +1,6 @@
 export interface List<T> {
-  get(Index: number): T | null;
+  getByIndex(Index: number): T | null;
+  getByObject(Object: T): T | null;
   add(Object: T): boolean;
   remove(Object: T): boolean;
   contains(Object: T): boolean;
