@@ -1,7 +1,7 @@
 {
-  "name": "video_server_ts",
+  "name": "hangout_server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chat-based websocket server to help integrate WebRTC and chat services to clients.",
   "main": "index.js",
   "scripts": {
     "start": "node dist/server.js",
