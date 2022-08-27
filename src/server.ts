@@ -60,7 +60,7 @@ io.on(
       }
 
       const USER: User = {
-        id: data.id,
+        id: socket.id,
         position: data.position,
         username: data.username,
       };
