@@ -140,6 +140,7 @@ io.on(
         updatedList: roomArr,
       });
       _updateRoom(Room);
+      socket.disconnect(true);
     });
   }
 );
