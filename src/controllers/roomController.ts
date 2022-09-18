@@ -43,7 +43,6 @@ const createRoom: (Req: Request, Res: Response) => void = async (
     Res.status(200).json({
       roomID: ROOM.key,
       roomName: ROOM.name,
-      position: 1,
       username: roomRequest.username,
     });
     maxTries = CONFIG.RECURSIVE_ATTEMPTS.CREATE_ROOM;
