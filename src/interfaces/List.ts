@@ -1,9 +1,9 @@
 export interface List<T> {
-  getByIndex(Index: number): T | null;
-  getByObject(Object: T): T | null;
-  add(Object: T): boolean;
-  remove(Object: T): boolean;
+  get(Object: T): T | null;
+  add(Object: T): void;
+  remove(Object: T): void;
   contains(Object: T): boolean;
   toArray(): T[];
   size(): number;
+  isEmpty(): boolean;
 }

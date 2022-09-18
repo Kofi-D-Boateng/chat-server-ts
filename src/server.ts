@@ -5,7 +5,6 @@ import { createServer, Server } from "http";
 import logger from "morgan";
 import { API_VERSION, CONFIG } from "./config/config";
 import { Server as Srv, Socket } from "socket.io";
-import { User } from "./types/User";
 import { JoinRoomDatagram } from "./types/JoinRoom";
 
 const app: Express = express();
@@ -37,6 +36,7 @@ import { ReceivedSignalDatagram } from "./types/ReceivedSignal";
 import { MessageDatagram } from "./types/Message";
 import { DisconnectDatagram } from "./types/Disconnect";
 import { LinkedList } from "./classes/linkedList";
+import { User } from "./classes/user";
 
 app.use(`/${API_VERSION.VERSION}/rooms`, room);
 
@@ -58,26 +58,13 @@ io.on(
         socket.emit("room-status", { msg: "full" });
         return;
       }
-
-      const USER: User = {
-        id: socket.id,
-        position: data.position,
-        username: data.username,
-      };
-      const result: boolean = LinkedList.contains(USER);
-      if (!result) {
-        const result: boolean = LinkedList.add(USER);
-        if (!result) {
-          socket.emit("room-status", { msg: "error" });
-          console.log("Error: Could not add member to list.");
-          return;
-        }
-      }
-      if (result) LinkedList.update(USER);
+      const USER: User = new User(socket.id, undefined, data.username);
+      LinkedList.add(USER);
       const roomArray = LinkedList.toArray().filter((User: User) => {
         return User.id != USER.id;
       });
-      const position = LinkedList.getByObject(USER)?.position;
+      const position = LinkedList.get(USER)?.position;
+      console.log(position);
       socket.join(ROOM.key);
       socket.emit("all-users", { users: roomArray, position: position });
       _updateRoom(ROOM);
@@ -107,20 +94,19 @@ io.on(
         return;
       }
       const LinkedList = Room.members;
-      const findThisUser: User = {
-        id: socket.id,
-        username: data.user.username,
-        position: data.user.position,
-      };
-      const result = LinkedList.contains(findThisUser);
+      const USER: User = new User(
+        socket.id,
+        data.user.position,
+        data.user.username
+      );
+      const result = LinkedList.contains(USER);
       if (!result) return;
       io.to(Room.key).emit("chat", {
         message: data.user.message,
         id: socket.id,
-        sender: findThisUser.username,
+        sender: USER.username,
       });
     });
-    // WORK ON LEAVE!!!!
     socket.on("leave", async (data: DisconnectDatagram) => {
       const Room = await _searchForRoom(data.room);
       if (!Room) {
@@ -128,7 +114,10 @@ io.on(
         return;
       }
       const LinkedList = Room.members;
-      if (data.user.id !== socket.id) return;
+      if (data.user.id !== socket.id) {
+        socket.emit("room-status", { msg: "error" });
+        return;
+      }
       LinkedList.remove(data.user);
       const roomArr = LinkedList.toArray();
       if (LinkedList.size() <= 0) {
