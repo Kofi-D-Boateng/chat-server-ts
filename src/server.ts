@@ -64,7 +64,6 @@ io.on(
         return User.id != USER.id;
       });
       const position = LinkedList.get(USER)?.position;
-      console.log(position);
       socket.join(ROOM.key);
       socket.emit("all-users", { users: roomArray, position: position });
       _updateRoom(ROOM);
