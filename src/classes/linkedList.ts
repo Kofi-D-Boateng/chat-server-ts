@@ -35,7 +35,6 @@ export class LinkedList implements List<User> {
   }
   contains(Object: User): boolean {
     const User: User = Object;
-    console.log(User);
     if (User.position == 1) return User.id == this.head?.data.id;
     else if (User.position == this.length) return User.id == this.tail?.data.id;
     else if (User.position > 0) {
