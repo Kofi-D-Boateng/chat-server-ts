@@ -26,6 +26,10 @@ export class LinkedList implements List<User> {
   }
   add(member: User): void {
     const N: Node = new Node(member);
+    if (this.length == 0) {
+      this.pushFront(N);
+      return;
+    }
     this.pushBack(N);
   }
   copy(LinkedList: LinkedList): void {

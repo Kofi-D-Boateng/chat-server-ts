@@ -3,7 +3,7 @@ export interface List<T> {
   add(Object: T): void;
   remove(Object: T): void;
   contains(Object: T): boolean;
-  toArray(): T[];
+  toArray(): Array<T>;
   size(): number;
   isEmpty(): boolean;
 }

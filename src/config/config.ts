@@ -12,7 +12,7 @@ export const CONFIG = {
   REDIS_HOST: process.env.REDIS_CACHE_IP,
   REDIS_PORT: process.env.REDIS_CACHE_PORT,
   TOKEN_CONFIG: {
-    LENGTH_OF_TOKEN: +process.env.TOKEN_LENGTH! || 12,
+    LENGTH_OF_TOKEN: +process.env.TOKEN_LENGTH! || 8,
     TOKEN_STRING_FORMAT: process.env.TOKEN_STRING_FORMAT || "hex",
   },
   ROOM_CONFIG: {
