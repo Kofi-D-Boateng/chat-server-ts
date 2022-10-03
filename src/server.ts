@@ -118,6 +118,7 @@ io.on(
         return;
       }
       LinkedList.remove(data.user);
+      console.log(LinkedList);
       const roomArr = LinkedList.toArray();
       if (LinkedList.size() <= 0) {
         _deleteRoomFromMemory(Room);
