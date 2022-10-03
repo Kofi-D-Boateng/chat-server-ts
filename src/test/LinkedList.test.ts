@@ -88,8 +88,9 @@ describe("Linked List suite", () => {
       L1.add(U1);
     }
     const Array = L1.toArray();
+    const ArraySpot2 = Array[1];
     expect(L1.isEmpty()).toBe(false);
     expect(L1.size()).toBe(Array.length);
-    expect(L1.get(Array[0])?.position).toBe(Array[0].position);
+    expect(L1.get(Array[1])).toEqual(ArraySpot2);
   });
 });

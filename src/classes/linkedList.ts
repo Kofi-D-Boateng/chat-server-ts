@@ -41,28 +41,26 @@ export class LinkedList implements List<User> {
     const User: User = Object;
     if (User.position == 1) return User.id == this.head?.data.id;
     else if (User.position == this.length) return User.id == this.tail?.data.id;
-    else if (User.position > 0) {
-      const parentNode = this.findNodeByIndex(User.position);
+    else {
+      const foundNode = this.findNodeByIndex(User.position);
       return (
-        User.position === parentNode?.next?.data.position &&
-        User.id == parentNode.next.data.id
+        foundNode?.data.position === User.position &&
+        foundNode.data.id === User.id
       );
     }
-    return false;
   }
   get(Object: User): User | null {
-    if (Object.position == 1 && this.head) return this.head.data;
+    if (this.length <= 0) return null;
+    else if (Object.position == 1 && this.head) return this.head.data;
     else if (Object.position == this.length && this.tail) return this.tail.data;
     else if (Object.position > 0) {
-      const parentNode = this.findNodeByIndex(Object.position);
-      if (!parentNode) return null;
-      if (!parentNode.next) return null;
-      return parentNode.next?.data;
+      const foundNode = this.findNodeByIndex(Object.position);
+      if (!foundNode) return null;
+      return foundNode.data;
     }
-    const parentNode = this.findNodeByObject(Object);
-    if (!parentNode) return null;
-    if (!parentNode.next) return null;
-    return parentNode.next?.data;
+    const foundNode = this.findNodeByObject(Object);
+    if (!foundNode) return null;
+    return foundNode.data;
   }
   isEmpty(): boolean {
     return this.length <= 0;
@@ -74,20 +72,29 @@ export class LinkedList implements List<User> {
       this.length = 0;
       return;
     }
-    let parentNode: Node | null = this.findNodeByIndex(Object.position);
-    if (parentNode) {
-      if (
-        parentNode.next &&
-        parentNode.next.data.position === Object.position
-      ) {
-        parentNode.next = parentNode.next.next;
-        this.length -= 1;
+    let foundNode: Node | null = this.findNodeByIndex(Object.position);
+    if (this.length == 1) {
+      this.head = null;
+      this.tail = null;
+      this.length = 0;
+    } else if (foundNode) {
+      if (!foundNode.prev && foundNode.next) {
+        // Reposition head node
+        let prevHeadNext = foundNode.next;
+        prevHeadNext.prev = null;
+        this.head = prevHeadNext;
         this.updatePosition();
-      } else if (Object.position === 1) {
-        const temp: Node | null = parentNode.next;
-        temp!.prev = null;
-        this.head = temp as Node;
-        this.length -= 1;
+      } else if (!foundNode.next && foundNode.prev) {
+        // Update tail;
+        let TailPrev = foundNode.prev;
+        TailPrev.next = null;
+        this.tail = TailPrev;
+        this.updatePosition();
+      } else {
+        let foundNodePrev = foundNode.prev;
+        let foundNodeNext = foundNode.next;
+        foundNodePrev!.next = foundNodeNext;
+        foundNodeNext!.prev = foundNodePrev;
         this.updatePosition();
       }
     }
@@ -114,12 +121,11 @@ export class LinkedList implements List<User> {
     return arr;
   }
   private findNodeByIndex(Index: number): Node | null {
-    const parentIndex = Index - 1,
-      midpoint = this.length / 2;
+    const midpoint = this.length / 2;
     if (Index >= midpoint) {
       let currNode: Node | null = this.tail;
       let count = this.length;
-      while (count != parentIndex) {
+      while (count != Index) {
         if (currNode?.prev) currNode = currNode.prev;
         count--;
       }
@@ -127,7 +133,7 @@ export class LinkedList implements List<User> {
     }
     let currNode: Node | null = this.head;
     let count = 1;
-    while (count != parentIndex) {
+    while (count != Index) {
       if (currNode?.next) currNode = currNode?.next;
       count++;
     }
@@ -136,13 +142,13 @@ export class LinkedList implements List<User> {
   private findNodeByObject(Object: User): Node | null {
     let currNode: Node | null = this.head;
     if (!currNode?.next) return currNode;
-    while (currNode && currNode.next) {
-      if (currNode.next.data.id === Object.id) break;
-      else currNode = currNode.next;
+    while (currNode && currNode.data.id != Object.id && currNode.next) {
+      currNode = currNode.next;
     }
     return currNode;
   }
   private pushFront(Node: Node): void {
+    Node.data.position = this.length + 1;
     if (!this.head) {
       this.head = Node;
       this.tail = Node;
@@ -176,5 +182,6 @@ export class LinkedList implements List<User> {
       ++count;
     }
     this.head = head;
+    this.length = count;
   }
 }

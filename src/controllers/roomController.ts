@@ -11,10 +11,7 @@ const findRoom: (Req: Request, Res: Response) => void = async (
   const PARAM = Req.query["key"];
   const ROOM = await _searchForRoom(PARAM as string);
   if (ROOM) {
-    const token = randomBytes(CONFIG.TOKEN_CONFIG.LENGTH_OF_TOKEN).toString(
-      CONFIG.TOKEN_CONFIG.TOKEN_STRING_FORMAT as BufferEncoding
-    );
-    Res.status(200).json({ token: token, roomName: ROOM.name, key: ROOM.key });
+    Res.status(200).json({ roomName: ROOM.name });
   } else {
     Res.status(400).json();
   }
