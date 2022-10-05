@@ -32,7 +32,7 @@ const createRoom: (Req: Request, Res: Response) => void = async (
     username: creator,
     capacity: parseInt(capacity),
   };
-  const ROOMID: string = randomBytes(16).toString(
+  const ROOMID: string = randomBytes(CONFIG.ROOM_CONFIG.LENGTH_OF_ID).toString(
     CONFIG.ROOM_CONFIG.ROOM_ID_FORMAT as BufferEncoding
   );
   const ROOM = await _createRoom(ROOMID, roomRequest);
