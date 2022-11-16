@@ -5,7 +5,7 @@ import { User } from "../classes/user";
 
 describe("Linked List suite", () => {
   test("Instantiates a empty list", () => {
-    const LL = new LinkedList();
+    const LL = new LinkedList<number>();
     expect(LL.isEmpty()).toBe(true);
     expect(LL.length).toBe(0);
   });

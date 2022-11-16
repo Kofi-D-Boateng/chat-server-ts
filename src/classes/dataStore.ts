@@ -47,6 +47,8 @@ export class DataStore<T> {
     const newStringifiedObj = JSON.stringify(lastElement);
     this._map.set(newStringifiedObj, elementToRemoveIndex);
 
+    // Remove hash and element from both data structures.
+    this._map.delete(stringifiedObj);
     this._array.pop();
   }
   // Returns size of the array instead of keys, since the array houses
