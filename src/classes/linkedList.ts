@@ -1,5 +1,4 @@
 import { List } from "../interfaces/List";
-import { User } from "../types/User";
 import { Node } from "./node";
 
 /**
@@ -12,143 +11,105 @@ import { Node } from "./node";
  *
  */
 
-type Tail = Node | null;
-type Head = Node | null;
-
-export class LinkedList implements List<User> {
-  head: Head;
-  tail: Tail;
+export class LinkedList<T> implements List<T> {
+  head: Node<T> | null;
+  tail: Node<T> | null;
   length: number;
-  constructor(Node: Head = null, size: number = 0) {
-    this.head = Node;
-    this.tail = Node;
-    this.length = size;
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
   }
-  add(member: User): void {
-    const N: Node = new Node(member);
+  add(member: T): void {
+    const N: Node<T> = new Node(member);
     if (this.length == 0) {
       this.pushFront(N);
       return;
     }
     this.pushBack(N);
   }
-  copy(LinkedList: LinkedList): void {
+  copy(LinkedList: LinkedList<T>): void {
     this.head = LinkedList.head;
     this.tail = LinkedList.tail;
     this.length = LinkedList.length;
   }
-  contains(Object: User): boolean {
-    const User: User = Object;
-    if (User.position == 1) return User.id == this.head?.data.id;
-    else if (User.position == this.length) return User.id == this.tail?.data.id;
+  contains(Object: T): boolean {
+    if (!this.head && !this.tail) return false;
+    else if (this.head?.data == Object) return true;
+    else if (this.tail?.data == Object) return true;
     else {
-      const foundNode = this.findNodeByIndex(User.position);
-      return (
-        foundNode?.data.position === User.position &&
-        foundNode.data.id === User.id
-      );
+      const foundNode = this.findNode(Object);
+      return foundNode != null;
     }
   }
-  get(Object: User): User | null {
+  get(Object: T): T | null {
+    const src: Node<T> = new Node(Object);
     if (this.length <= 0) return null;
-    else if (Object.position == 1 && this.head) return this.head.data;
-    else if (Object.position == this.length && this.tail) return this.tail.data;
-    else if (Object.position > 0) {
-      const foundNode = this.findNodeByIndex(Object.position);
+    else if (this.head?.data == src.data) return this.head.data;
+    else if (this.tail?.data == src.data) return this.tail.data;
+    else {
+      const foundNode = this.findNode(Object);
       if (!foundNode) return null;
       return foundNode.data;
     }
-    const foundNode = this.findNodeByObject(Object);
-    if (!foundNode) return null;
-    return foundNode.data;
   }
   isEmpty(): boolean {
     return this.length <= 0;
   }
-  remove(Object: User): void {
+  remove(Object: T): void {
     if (this.length == 1) {
       this.head = null;
       this.tail = null;
       this.length = 0;
       return;
     }
-    let foundNode: Node | null = this.findNodeByIndex(Object.position);
-    if (this.length == 1) {
-      this.head = null;
-      this.tail = null;
-      this.length = 0;
-    } else if (foundNode) {
+
+    let foundNode: Node<T> | null = this.findNode(Object);
+    if (foundNode) {
       if (!foundNode.prev && foundNode.next) {
         // Reposition head node
         let prevHeadNext = foundNode.next;
         prevHeadNext.prev = null;
         this.head = prevHeadNext;
-        this.updatePosition();
       } else if (!foundNode.next && foundNode.prev) {
         // Update tail;
         let TailPrev = foundNode.prev;
         TailPrev.next = null;
         this.tail = TailPrev;
-        this.updatePosition();
       } else {
         let foundNodePrev = foundNode.prev;
         let foundNodeNext = foundNode.next;
         foundNodePrev!.next = foundNodeNext;
         foundNodeNext!.prev = foundNodePrev;
-        this.updatePosition();
       }
+      this.length--;
     }
   }
   size(): number {
     return this.length;
   }
-  toArray(): Array<User> {
-    let arr: Array<User> = [],
+  toArray(): Array<T> {
+    let arr: Array<T> = [],
       i = 0,
-      currNode: Head = this.head;
+      currNode = this.head;
     while (i < this.length) {
       if (currNode?.data != null) {
-        const USER: User = {
-          id: currNode.data.id,
-          position: currNode.data.position,
-          username: currNode.data.username,
-        };
-        arr.push(USER);
-        currNode = currNode.next as Node;
+        arr.push(currNode.data);
+        currNode = currNode.next;
       }
       i++;
     }
     return arr;
   }
-  private findNodeByIndex(Index: number): Node | null {
-    const midpoint = this.length / 2;
-    if (Index >= midpoint) {
-      let currNode: Node | null = this.tail;
-      let count = this.length;
-      while (count != Index) {
-        if (currNode?.prev) currNode = currNode.prev;
-        count--;
-      }
-      return currNode;
+  private findNode(Object: T): Node<T> | null {
+    let currNode = this.head;
+    while (currNode) {
+      if (currNode.data == Object) return currNode;
+      else currNode = currNode.next;
     }
-    let currNode: Node | null = this.head;
-    let count = 1;
-    while (count != Index) {
-      if (currNode?.next) currNode = currNode?.next;
-      count++;
-    }
-    return currNode;
+    return null;
   }
-  private findNodeByObject(Object: User): Node | null {
-    let currNode: Node | null = this.head;
-    if (!currNode?.next) return currNode;
-    while (currNode && currNode.data.id != Object.id && currNode.next) {
-      currNode = currNode.next;
-    }
-    return currNode;
-  }
-  private pushFront(Node: Node): void {
-    Node.data.position = this.length + 1;
+  private pushFront(Node: Node<T>): void {
     if (!this.head) {
       this.head = Node;
       this.tail = Node;
@@ -160,8 +121,7 @@ export class LinkedList implements List<User> {
     }
     this.length++;
   }
-  private pushBack(Node: Node): void {
-    Node.data.position = this.length + 1;
+  private pushBack(Node: Node<T>): void {
     if (!this.head) {
       this.head = Node;
       this.tail = Node;
@@ -171,17 +131,5 @@ export class LinkedList implements List<User> {
       this.tail = Node;
     }
     this.length++;
-  }
-  private updatePosition(): void {
-    const head: Head = this.head;
-    let dummy: Node | null = head;
-    let count = 0;
-    while (count <= this.length && dummy) {
-      dummy.data.position = count + 1;
-      dummy = dummy.next;
-      ++count;
-    }
-    this.head = head;
-    this.length = count;
   }
 }

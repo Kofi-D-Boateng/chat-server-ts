@@ -1,19 +1,20 @@
+import { DataStore } from "./dataStore";
 import { LinkedList } from "./linkedList";
 
-export class Room {
+export class Room<T> {
   key: string;
   name: string;
   maxCapacity: number;
-  members: LinkedList;
+  store: DataStore<T>;
   constructor(
     key: string,
     name: string,
     maxCapacity: number,
-    members: LinkedList
+    store: DataStore<T>
   ) {
     this.key = key;
     this.name = name;
     this.maxCapacity = maxCapacity;
-    this.members = members;
+    this.store = store;
   }
 }
