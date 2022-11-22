@@ -17,7 +17,7 @@ import { ReceivedSignalDatagram } from "./types/ReceivedSignal";
 import { MessageDatagram } from "./types/Message";
 import { DisconnectDatagram } from "./types/Disconnect";
 import { User } from "./classes/user";
-import { DataStore } from "./classes/DataStore";
+import { DataStore } from "./classes/dataStore";
 import router from "./routes/room";
 
 const app: Express = express();

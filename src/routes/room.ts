@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import express, { Response, Request } from "express";
-import { DataStore } from "../classes/DataStore";
+import { DataStore } from "../classes/dataStore";
 import { Room } from "../classes/roomClass";
 import { User } from "../classes/user";
 import { CONFIG } from "../config/config";

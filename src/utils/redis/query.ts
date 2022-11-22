@@ -3,7 +3,8 @@ import { Room } from "../../classes/roomClass";
 import { parse, stringify } from "flatted";
 import { CONFIG } from "../../config/config";
 import { User } from "../../classes/user";
-import { DataStore } from "../../classes/DataStore";
+import { DataStore } from "../../classes/dataStore";
+
 const REDIS_URL: string = `redis://${CONFIG.REDIS_HOST}:${CONFIG.REDIS_PORT}`;
 
 const _searchForRoom: (key: string) => Promise<Room<User> | null> = async (
