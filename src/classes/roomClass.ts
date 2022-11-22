@@ -1,4 +1,4 @@
-import { DataStore } from "./DataStore";
+import { DataStore } from "./dataStore";
 
 export class Room<T> {
   key: string;

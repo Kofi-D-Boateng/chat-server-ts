@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { CreateRoomRequest } from "../types/Request";
 import { Room } from "../classes/roomClass";
 import { User } from "../classes/user";
-import { DataStore } from "../classes/DataStore";
+import { DataStore } from "../classes/dataStore";
 let roomID: string, data: CreateRoomRequest;
 const _createRoom = jest.fn();
 const _searchForRoom = jest.fn();
