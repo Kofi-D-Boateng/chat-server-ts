@@ -58,4 +58,10 @@ describe("Data Store suite", () => {
     expect(DS1.find(5)).not.toBe(null);
     expect(DS1.find(5)).toBe(5);
   });
+  test("Returns correct boolean in contains", () => {
+    const DS: DataStore<number> = new DataStore();
+    expect(DS.contains(1)).toBe(false);
+    DS.insert(5);
+    expect(DS.contains(5)).toBe(true);
+  });
 });
