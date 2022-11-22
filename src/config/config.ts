@@ -24,9 +24,7 @@ export const CONFIG = {
   },
 };
 
-export const API_VERSION = {
-  VERSION: "api/v1",
-};
+export const API_VERSION = "api/v1";
 
 export const ROUTES = {
   USER_SETTINGS: "/configure-room",

@@ -1,5 +1,4 @@
 import { DataStore } from "./dataStore";
-import { LinkedList } from "./linkedList";
 
 export class Room<T> {
   key: string;

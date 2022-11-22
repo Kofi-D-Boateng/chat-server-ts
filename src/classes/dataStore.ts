@@ -15,40 +15,42 @@
 // store (e.g array:n, Linked-List:n, Red-Black Tree:Log(n), etc).
 
 export class DataStore<T> {
-  _map: Map<string, number>;
-  _array: Array<T>;
+  _map: { [key: string]: number };
+  _array: T[];
   constructor() {
-    this._map = new Map<string, number>();
-    this._array = new Array<T>();
+    this._map = {};
+    this._array = [];
   }
   // Creates a string hash and inserts element into the map and array.
   // Also guards against duplicate hashing.
   insert(Object: T): void {
     const stringifiedObj = JSON.stringify(Object);
-    if (this._map.has(stringifiedObj)) {
+    if (this._map[stringifiedObj]) {
       return;
     }
 
     this._array.push(Object);
-    this._map.set(stringifiedObj, this._array.length - 1);
+    this._map[stringifiedObj] = this._array.length - 1;
+    console.log(this._map);
+    console.log(this._array);
   }
   // Removes an element from the store.
   remove(Object: T): void {
     const stringifiedObj = JSON.stringify(Object);
-    if (!this._map.has(stringifiedObj)) {
+    if (!this._map[stringifiedObj]) {
       return;
     }
 
     const lastElement: T = this._array[this._array.length - 1];
-    const elementToRemoveIndex: number = this._map.get(stringifiedObj)!;
+    const elementToRemoveIndex: number = this._map[stringifiedObj];
     this._array[this._array.length - 1] = Object;
     this._array[elementToRemoveIndex] = lastElement;
 
     const newStringifiedObj = JSON.stringify(lastElement);
-    this._map.set(newStringifiedObj, elementToRemoveIndex);
+    this._map[newStringifiedObj] = elementToRemoveIndex;
 
     // Remove hash and element from both data structures.
-    this._map.delete(stringifiedObj);
+    delete this._map[stringifiedObj];
     this._array.pop();
   }
   // Returns size of the array instead of keys, since the array houses
@@ -61,17 +63,26 @@ export class DataStore<T> {
   // hash equivalent.
   contains(Object: T): boolean {
     const stringifiedObj = JSON.stringify(Object);
-    return this._map.has(stringifiedObj);
+    return (
+      this._map[stringifiedObj] != undefined &&
+      this._map[stringifiedObj] != null
+    );
   }
   // Takes in a DataStore and copies its values. This function is necessary
   // in JavaScript when parsing a stringified class to return its functionality.
-  copy(Object: DataStore<T>): void {
-    this._array = Object._array;
-    this._map = Object._map;
+  copy(Element: DataStore<T>): void {
+    this._map = {};
+    this._array = [];
+    Object.entries(Element._map).forEach((entry) => {
+      this._map[entry[0]] = entry[1];
+    });
+    Object.values(Element._array).forEach((element) => {
+      this._array.push(element);
+    });
   }
   // Checks whether the store is empty.
   isEmpty(): boolean {
-    return this._array.length == 0 && this._map.size == 0;
+    return this._array.length == 0;
   }
   // Takes in an Object and will either return the object if it exists or
   // return null, signifying it is absent from the store.
@@ -82,10 +93,10 @@ export class DataStore<T> {
   print() {
     console.log("Printing store.......");
     console.log("[");
-    for (const [key, val] of this._map) {
-      const actualObj = JSON.parse(key);
-      console.log(`Object: ${actualObj} --> Position in Array: ${val}`);
-    }
+    Object.entries(this._map).forEach((key) => {
+      const actualObj = JSON.parse(key[0]);
+      console.log(`Object: ${actualObj} --> Position in Array: ${key[1]}`);
+    });
     console.log("]");
   }
   // Returns the array of objects.
@@ -95,9 +106,9 @@ export class DataStore<T> {
   // Helper function for find (Reference comments on this.find)
   private get(Object: T): T | null {
     const stringifiedObj = JSON.stringify(Object);
-    if (!this._map.get(stringifiedObj)) {
+    if (!this._map[stringifiedObj]) {
       return null;
     }
-    return this._array[this._map.get(stringifiedObj) as number];
+    return this._array[this._map[stringifiedObj]];
   }
 }

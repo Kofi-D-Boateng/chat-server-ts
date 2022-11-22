@@ -1,6 +1,4 @@
 export type JoinRoomDatagram = {
-  roomID: string;
+  roomId: string;
   username: string;
-  id: string;
-  position: number;
 };
