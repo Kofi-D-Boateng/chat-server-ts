@@ -1,4 +1,4 @@
-import { DataStore } from "./dataStore";
+import { DataStore } from "./DataStore";
 import { LinkedList } from "./linkedList";
 
 export class Room<T> {

@@ -1,11 +1,9 @@
 import { _closeConnection, _init } from "../../config/database/redis";
-import { LinkedList } from "../../classes/linkedList";
-import { CreateRoomRequest } from "../../types/Request";
 import { Room } from "../../classes/roomClass";
 import { parse, stringify } from "flatted";
 import { CONFIG } from "../../config/config";
 import { User } from "../../classes/user";
-import { DataStore } from "../../classes/dataStore";
+import { DataStore } from "../../classes/DataStore";
 const REDIS_URL: string = `redis://${CONFIG.REDIS_HOST}:${CONFIG.REDIS_PORT}`;
 
 const _searchForRoom: (key: string) => Promise<Room<User> | null> = async (
@@ -27,32 +25,13 @@ const _searchForRoom: (key: string) => Promise<Room<User> | null> = async (
   }
 };
 
-const _createRoom: (
-  key: string,
-  room: CreateRoomRequest
-) => Promise<Room<User> | null> = async (
-  key: string,
-  request: CreateRoomRequest
-) => {
+const _createRoom: (room: Room<User>) => void = async (room) => {
   const redis = await _init(REDIS_URL);
-  const store = new DataStore<User>();
-  let roomRef: Room<User> = new Room<User>(
-    key,
-    request.name,
-    request.capacity,
-    store
-  );
   try {
-    const r = await redis.GET(key);
-    if (r) {
-      throw new Error("Duplicate Hash generated");
-    }
-    await redis.SET(key, stringify(roomRef));
+    await redis.SET(room.key, stringify(room));
     _closeConnection(redis);
-    return roomRef;
   } catch (error) {
     console.log(error);
-    return null;
   }
 };
 

@@ -1,5 +1,5 @@
 import "jest";
-import { DataStore } from "../classes/dataStore";
+import { DataStore } from "../classes/DataStore";
 
 describe("Data Store suite", () => {
   test("Instantiates an empty list", () => {
