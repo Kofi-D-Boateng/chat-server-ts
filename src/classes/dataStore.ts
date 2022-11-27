@@ -31,8 +31,6 @@ export class DataStore<T> {
 
     this._array.push(Object);
     this._map[stringifiedObj] = this._array.length - 1;
-    console.log(this._map);
-    console.log(this._array);
   }
   // Removes an element from the store.
   remove(Object: T): void {

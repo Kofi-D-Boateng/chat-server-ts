@@ -10,9 +10,8 @@ const router = express.Router();
 
 router.get("/find-room", async (Req: Request, Res: Response) => {
   const key = Req.query["key"] as string;
-  console.log(key);
   const result = await _searchForRoom(key);
-  result ? Res.status(200).json() : Res.status(400);
+  result ? Res.status(200).json() : Res.status(400).json();
 });
 
 router.post("/create-room", async (Req: Request, Res: Response) => {
