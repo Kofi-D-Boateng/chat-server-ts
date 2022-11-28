@@ -11,7 +11,15 @@ const router = express.Router();
 router.get("/find-room", async (Req: Request, Res: Response) => {
   const key = Req.query["key"] as string;
   const result = await _searchForRoom(key);
-  result ? Res.status(200).json() : Res.status(400).json();
+  if (result) {
+    if (result.store.size() + 1 > result.maxCapacity) {
+      Res.status(400).json({ message: "full" });
+    } else {
+      Res.status(200).json({ message: "found", roomName: result.name });
+    }
+  } else {
+    Res.status(400).json({ message: "not found" });
+  }
 });
 
 router.post("/create-room", async (Req: Request, Res: Response) => {
