@@ -6,7 +6,6 @@ export const CONFIG = {
   JWT_SECRET: process.env.JWT_SECRET || randomBytes(12).toString("hex"),
   EXPIRESIN: process.env.EXPIRES_IN || "60000",
   ORIGINS: process.env.CORS_ORIGINS || "*",
-  METHODS: process.env.CORS_METHODS || "GET,POST",
   LOGGER_TYPE: process.env.LOGGER || "dev",
   MAX_ROOM_CAPACITY: process.env.MAX_CAPACITY || 100,
   REDIS_HOST: process.env.REDIS_CACHE_IP,
@@ -22,6 +21,7 @@ export const CONFIG = {
   RECURSIVE_ATTEMPTS: {
     CREATE_ROOM: 10,
   },
+  PATH: "/chat-socket/",
 };
 
 export const API_VERSION = "api/v1";
