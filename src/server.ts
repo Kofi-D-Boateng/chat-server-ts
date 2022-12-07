@@ -35,7 +35,7 @@ app.use(express.json());
 app.use(`/${API_VERSION}/rooms`, router);
 
 const server: Server = createServer(app);
-const io = new Srv(server, { cors: whitelist });
+const io = new Srv(server, { cors: whitelist, path: CONFIG.PATH });
 
 // MAIN WORK
 io.on(
