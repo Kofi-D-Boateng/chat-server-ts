@@ -26,7 +26,7 @@ const whitelist: CorsOptions = {
   origin: [CONFIG.ORIGINS],
   credentials: true,
   optionsSuccessStatus: 204,
-  methods: [CONFIG.METHODS],
+  methods: ["GET", "POST"],
 };
 app.use(logger(CONFIG.LOGGER_TYPE));
 app.use(cors(whitelist));
@@ -35,7 +35,11 @@ app.use(express.json());
 app.use(`/${API_VERSION}/rooms`, router);
 
 const server: Server = createServer(app);
-const io = new Srv(server, { cors: whitelist, path: CONFIG.PATH });
+const io = new Srv(server, {
+  cors: whitelist,
+  path: CONFIG.PATH,
+  transports: ["websocket", "polling"],
+});
 
 // MAIN WORK
 io.on(
