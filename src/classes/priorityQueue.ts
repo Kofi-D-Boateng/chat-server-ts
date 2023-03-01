@@ -5,14 +5,16 @@
  * or a max heap
  */
 
-class PriorityQueue<T> {
+export class PriorityQueue<T> {
   private heap: T[] = [];
   private comparator: (a: T, b: T) => number;
   private isMinHeap: boolean;
 
   constructor(comparator?: (a: T, b: T) => number) {
-    this.comparator = comparator || ((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-    this.isMinHeap = this.comparator(1 as T, 2 as T) < 0;
+    this.comparator =
+      comparator ||
+      ((a: T, b: T) => (a as unknown as number) - (b as unknown as number));
+    this.isMinHeap = this.comparator(1 as unknown as T, 2 as unknown as T) < 0;
   }
   /**
    *
@@ -30,8 +32,11 @@ class PriorityQueue<T> {
    * @description The poll function will return the min or max element of the heap
    *
    */
-  poll(): T {
+  poll(): T | null {
+    if (this.isEmpty()) return null;
     const item = this.heap[0];
+    this.heap[0] = this.heap[this.heap.length - 1];
+    this.heap.pop();
     this.heapifyDown(0);
     return item;
   }
@@ -45,12 +50,36 @@ class PriorityQueue<T> {
   }
   /**
    *
+   * @returns number
+   * @description Returns the size of the heap.
+   */
+  size(): number {
+    return this.heap.length;
+  }
+  /**
+   *
    * @param index number
    * @returns void
    * @description This helper function is called after all insertions in order to maintain the heap invariant.
    */
+  print(): void {
+    console.log(this.heap);
+  }
   private heapifyUp(index: number): void {
-    while (index > 0) {}
+    if (index > 0) {
+      const parentIndex = this.getParent(index);
+      if (this.isMinHeap) {
+        if (this.comparator(this.heap[index], this.heap[parentIndex]) < 0) {
+          this.swap(parentIndex, index);
+          this.heapifyUp(parentIndex);
+        }
+      } else {
+        if (this.comparator(this.heap[parentIndex], this.heap[index]) > 0) {
+          this.swap(parentIndex, index);
+          this.heapifyUp(parentIndex);
+        }
+      }
+    }
   }
 
   /**
@@ -64,7 +93,7 @@ class PriorityQueue<T> {
       if (this.isMinHeap) {
         const smallestChildIndex = this.minChild(index);
         if (
-          this.comparator(this.heap[smallestChildIndex], this.heap[index]) < 0
+          this.comparator(this.heap[index], this.heap[smallestChildIndex]) > 0
         ) {
           this.swap(smallestChildIndex, index);
           this.heapifyDown(smallestChildIndex);
@@ -72,7 +101,7 @@ class PriorityQueue<T> {
       } else {
         const biggestChildIndex = this.maxChild(index);
         if (
-          this.comparator(this.heap[biggestChildIndex], this.heap[index]) > 0
+          this.comparator(this.heap[index], this.heap[biggestChildIndex]) > 0
         ) {
           this.swap(biggestChildIndex, index);
           this.heapifyDown(biggestChildIndex);
@@ -81,6 +110,15 @@ class PriorityQueue<T> {
     }
   }
 
+  /**
+   *
+   * @param index number
+   * @returns number
+   * @description Returns the parent index of the index passed in.
+   */
+  private getParent(index: number): number {
+    return Math.floor((index - 1) / 2);
+  }
   /**
    *
    * @param index number
@@ -97,8 +135,8 @@ class PriorityQueue<T> {
    * @description Returns the index of the minimum child between the index passed. This node will never be a leaf node as it is called after the isLeaf check.
    */
   private minChild(index: number): number {
-    const leftChild = 2 * (index + 1);
-    const rightChild = 2 * (index + 2);
+    const leftChild = 2 * index + 1;
+    const rightChild = 2 * index + 2;
     if (this.comparator(this.heap[leftChild], this.heap[rightChild]) < 0) {
       return leftChild;
     }
@@ -112,9 +150,9 @@ class PriorityQueue<T> {
    * @description Returns the index of the max child between the index passed. This node will never be a leaf node as it is called after the isLeaf check.
    */
   private maxChild(index: number): number {
-    const leftChild = 2 * (index + 1);
-    const rightChild = 2 * (index + 2);
-    if (this.comparator(this.heap[leftChild], this.heap[rightChild]) > 0) {
+    const leftChild = 2 * index + 1;
+    const rightChild = 2 * index + 2;
+    if (this.comparator(this.heap[leftChild], this.heap[rightChild]) < 0) {
       return leftChild;
     }
     return rightChild;

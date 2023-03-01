@@ -1,8 +1,8 @@
-import { randomBytes } from "crypto";
 import "jest";
-import { LinkedList } from "../classes/linkedList";
+import { randomBytes } from "crypto";
 import { User } from "../classes/user";
 import { Message } from "../types/Message";
+import { LinkedList } from "../classes/linkedList";
 
 describe("Linked List suite", () => {
   test("Instantiates a empty list", () => {
