@@ -1,6 +1,6 @@
 export type ReceivedSignalDatagram = {
   signal: string;
-  callerID: string;
+  callerId: string;
   userToSignal: string;
-  roomID: string;
+  roomId: string;
 };

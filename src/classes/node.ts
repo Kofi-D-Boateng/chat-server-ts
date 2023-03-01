@@ -5,7 +5,6 @@
  * This class is purposed with creating new nodes for List data structures
  *
  */
-
 export class Node<T> {
   next: Node<T> | null;
   prev: Node<T> | null;

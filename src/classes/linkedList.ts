@@ -10,15 +10,20 @@ import { Node } from "./node";
  *
  *
  */
-
 export class LinkedList<T> implements List<T> {
-  head: Node<T> | null;
-  tail: Node<T> | null;
-  length: number;
+  private head: Node<T> | null;
+  private tail: Node<T> | null;
+  private length: number;
   constructor() {
     this.head = null;
     this.tail = null;
     this.length = 0;
+  }
+  getHead(): Node<T> | null {
+    return this.head;
+  }
+  getTail(): Node<T> | null {
+    return this.tail;
   }
   add(member: T): void {
     const N: Node<T> = new Node(member);

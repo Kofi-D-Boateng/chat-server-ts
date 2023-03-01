@@ -14,13 +14,14 @@ import {
 } from "./utils/redis/query";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ReceivedSignalDatagram } from "./types/ReceivedSignal";
-import { MessageDatagram } from "./types/Message";
+import { Message, MessageDatagram } from "./types/Message";
 import { DisconnectDatagram } from "./types/Disconnect";
 import { User } from "./classes/user";
-import { DataStore } from "./classes/dataStore";
+import { StoreCacheSingleton } from "./classes/storeSingleton";
 import router from "./routes/room";
 
 const app: Express = express();
+const store = StoreCacheSingleton.getStore();
 
 const whitelist: CorsOptions = {
   origin: [CONFIG.ORIGINS],
@@ -50,84 +51,113 @@ io.on(
     socket.emit("myID", { ID: socket.id });
 
     socket.on("join-room", async (data: JoinRoomDatagram) => {
-      const Room = await _searchForRoom(data.roomId);
+      const Room = store.get(data.roomId);
       if (!Room) {
         io.to(socket.id).emit("room-status", { msg: "error" });
         return;
       }
 
-      const DataStore: DataStore<User> = Room.store;
-      const USER: User = new User(socket.id, data.username);
-      DataStore.insert(USER);
-      const roomArray = DataStore.toArray().filter((User: User) => {
-        return User.id != USER.id;
-      });
-      socket.join(Room.key);
+      const DataStore = Room.getStore();
+      const USER: User = new User(socket.id, data.username, new Set<Message>());
+      DataStore.set(socket.id, USER);
+      const userIter: IterableIterator<User> = DataStore.values();
+      const roomArray: Array<User> = new Array();
+      while (true) {
+        const iterRes = userIter.next();
+        if (iterRes.done) {
+          break;
+        }
+        if (iterRes.value.getId() != USER.getId())
+          roomArray.push(iterRes.value);
+      }
+      socket.join(Room.getKey());
       socket.emit("all-users", { users: roomArray });
-      _updateRoom(Room);
+      store.set(data.roomId, Room);
     });
 
     socket.on("sending-signal", async (data: ReceivedSignalDatagram) => {
-      const Room = await _searchForRoom(data.roomID);
+      const Room = store.get(data.roomId);
       if (!Room) {
         socket.emit("room-status", { msg: "error" });
         return;
       }
-      const roomArr = Room.store.toArray();
+      const iter = Room.getStore().values();
+      const roomArr: Array<User> = new Array();
+      while (true) {
+        const res = iter.next();
+        if (res.done) break;
+        roomArr.push(iter.next().value);
+      }
       io.to(data.userToSignal).emit("user-joined", {
         signal: data.signal,
-        callerID: data.callerID,
+        callerID: data.callerId,
         updatedUserList: roomArr,
       });
     });
 
     socket.on("returning-signal", (data: ReceivedSignalDatagram) => {
-      io.to(data.callerID).emit("receiving-signal", {
+      io.to(data.callerId).emit("receiving-signal", {
         signal: data.signal,
         id: socket.id,
       });
     });
 
     socket.on("message", async (data: MessageDatagram) => {
-      const Room = await _searchForRoom(data.room);
+      const Room = store.get(data.roomId);
       if (!Room) {
         socket.emit("room-status", { msg: "error" });
         return;
       }
-      const DataStore = Room.store;
-      const USER: User = { id: socket.id, username: data.user.username };
-      const result = DataStore.contains(USER);
-      if (!result) return;
-      io.to(Room.key).emit("chat", {
+
+      if (!Room.getStore().has(socket.id)) return;
+
+      Room.getMessages().add({
+        id: socket.id,
+        sender: data.user.username,
+        text: data.user.message,
+        createdAt: new Date().toISOString(),
+      });
+      store.set(data.roomId, Room);
+
+      io.to(Room.getKey()).emit("chat", {
         message: data.user.message,
         id: socket.id,
-        sender: USER.username,
+        sender: data.user.username,
       });
     });
 
     socket.on("leave", async (data: DisconnectDatagram) => {
-      const Room = await _searchForRoom(data.room);
+      const Room = store.get(data.roomId);
       if (!Room) {
         socket.emit("room-status", { msg: "error" });
         return;
       }
-      const DataStore = Room.store;
+
       if (data.user.id !== socket.id) {
         socket.emit("room-status", { msg: "error" });
         return;
       }
-      DataStore.remove(data.user);
+      Room.getStore().delete(socket.id);
 
-      if (DataStore.size() <= 0) {
-        _deleteRoomFromMemory(Room);
+      if (Room.getStore().size <= 0) {
+        store.delete(data.roomId);
         return;
       }
-      const arr = DataStore.toArray();
+
+      const iter = Room.getStore().values();
+      const roomArr: Array<User> = new Array();
+
+      while (true) {
+        const res = iter.next();
+        if (res.done) break;
+        roomArr.push(iter.next().value);
+      }
       socket.broadcast.emit("users-left", {
         leaver: socket.id,
-        updatedList: arr,
+        updatedList: roomArr,
       });
-      _updateRoom(Room);
+
+      store.set(data.roomId, Room);
       socket.disconnect(true);
     });
   }
