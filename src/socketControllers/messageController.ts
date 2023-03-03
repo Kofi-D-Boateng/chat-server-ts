@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { Room } from "../classes/roomClass";
@@ -18,24 +19,35 @@ export const MessageController: (
   }
 
   if (!Room.getStore().has(socket.id)) return;
-  const processedMessage = process_messages({
+  const processedMessage = processMessages({
     id: socket.id,
     sender: data.user.username,
     text: data.user.message,
-    createdAt: new Date().getUTCMilliseconds(),
+    createdAt: Date.now(),
   });
   if (processedMessage) {
-    Room.getMessages().add(processedMessage);
+    Room.insertMessage(processedMessage);
     store.set(data.roomId, Room);
 
-    io.to(Room.getKey()).emit("chat", {
-      message: data.user.message,
-      id: socket.id,
-      sender: data.user.username,
-    });
+    io.to(Room.getKey()).emit("chat", processedMessage);
   }
 };
 
-const process_messages: (message: Message) => Message | null = (message) => {
-  return message;
+export const processMessages: (message: Message) => Message | null = (
+  message
+) => {
+  console.log(message);
+  const worker = new Worker(
+    "C:/Users/kdboa/OneDrive/Desktop/chat-server-ts/src/workerThreadScripts/processMessage.ts",
+    {
+      workerData: message,
+    }
+  );
+  let returnMessage: Message | null = null;
+  worker.on("message", (data: Message) => (returnMessage = data));
+  worker.on("error", (err) => console.log(err.message));
+  worker.on("exit", (code) =>
+    console.log(`Worker Thread exited with code ${code}`)
+  );
+  return returnMessage;
 };

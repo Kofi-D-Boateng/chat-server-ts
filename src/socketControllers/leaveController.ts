@@ -26,17 +26,8 @@ export const LeaveController: (
     return;
   }
 
-  const iter = Room.getStore().values();
-  const roomArr: Array<User> = new Array();
-
-  while (true) {
-    const res = iter.next();
-    if (res.done) break;
-    roomArr.push(iter.next().value);
-  }
   socket.broadcast.emit("users-left", {
     leaver: socket.id,
-    updatedList: roomArr,
   });
 
   store.set(data.roomId, Room);

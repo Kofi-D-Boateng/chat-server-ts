@@ -28,7 +28,7 @@ const app: Express = express();
 const store = StoreCacheSingleton.getStore();
 
 const whitelist: CorsOptions = {
-  origin: [CONFIG.ORIGINS],
+  origin: CONFIG.ORIGINS,
   credentials: true,
   optionsSuccessStatus: 204,
   methods: ["GET", "POST"],

@@ -8,7 +8,6 @@ export class StoreCacheSingleton {
   constructor() {
     if (!StoreCacheSingleton.instance) {
       StoreCacheSingleton.instance = this;
-      return this;
     }
     return StoreCacheSingleton.instance;
   }

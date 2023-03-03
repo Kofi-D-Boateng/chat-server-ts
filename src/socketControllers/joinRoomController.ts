@@ -29,6 +29,7 @@ export const JoinRoomController: (
     }
     if (iterRes.value.getId() != USER.getId()) roomArray.push(iterRes.value);
   }
+  console.log(roomArray);
   socket.join(Room.getKey());
   socket.emit("all-users", { users: roomArray });
   store.set(data.roomId, Room);

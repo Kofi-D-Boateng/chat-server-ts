@@ -1,5 +1,6 @@
 import { Message } from "../types/Message";
 import { LinkedList } from "./linkedList";
+import { PriorityQueue } from "./priorityQueue";
 
 export class Room<K extends string | number | symbol, V> {
   private key: K;
@@ -35,5 +36,20 @@ export class Room<K extends string | number | symbol, V> {
   }
   getMessages(): LinkedList<Message> {
     return this.messages;
+  }
+
+  insertMessage(message: Message): void {
+    const minHeap: PriorityQueue<Message> = new PriorityQueue(
+      (a: Message, b: Message) => a.createdAt - b.createdAt
+    );
+    const oldMessages = this.messages;
+    for (const message of oldMessages) minHeap.offer(message);
+    minHeap.offer(message);
+    const newMessageList: LinkedList<Message> = new LinkedList();
+    while (!minHeap.isEmpty()) {
+      const m = minHeap.poll();
+      if (m) newMessageList.add(m);
+    }
+    this.messages.copy(newMessageList);
   }
 }

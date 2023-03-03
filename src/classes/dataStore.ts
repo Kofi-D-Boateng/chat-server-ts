@@ -107,4 +107,11 @@ export class DataStore<T> {
     }
     return this._array[this._map[stringifiedObj]];
   }
+
+  *[Symbol.iterator]() {
+    for (const key in this._map) {
+      let pos = this._map[key];
+      yield this._array[pos];
+    }
+  }
 }

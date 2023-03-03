@@ -137,4 +137,11 @@ export class LinkedList<T> implements List<T> {
     }
     this.length++;
   }
+  *[Symbol.iterator]() {
+    let curr = this.head;
+    while (curr) {
+      yield curr.data;
+      curr = curr.next;
+    }
+  }
 }

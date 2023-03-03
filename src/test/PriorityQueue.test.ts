@@ -8,10 +8,8 @@ describe("PriorityQueue Test Suite", () => {
     const arr = new Array<number>();
     for (let i = 0; i < 10; i++) arr.push(Math.floor(Math.random() * 100));
     for (const n of arr) minHeap.offer(n), minHeap2.offer(n);
-    minHeap.print();
     for (const n of arr) {
       expect(minHeap.poll()).toEqual(minHeap2.poll());
-      minHeap.print();
     }
   });
   test("Max Heap Queue", () => {
@@ -20,10 +18,8 @@ describe("PriorityQueue Test Suite", () => {
     const arr = new Array<number>();
     for (let i = 0; i < 10; i++) arr.push(Math.floor(Math.random() * 100));
     for (const n of arr) maxHeap.offer(n), maxHeap2.offer(n);
-    maxHeap.print();
     for (const n of arr) {
       expect(maxHeap.poll()).toEqual(maxHeap2.poll());
-      maxHeap.print();
     }
   });
   test("Size is incrementing correcting", () => {
