@@ -16,7 +16,6 @@ export const JoinRoomController: (
     io.to(socket.id).emit("room-status", { msg: "error" });
     return;
   }
-
   const DataStore = Room.getStore();
   const USER: User = new User(socket.id, data.username, new Set<Message>());
   DataStore.set(socket.id, USER);
@@ -29,8 +28,7 @@ export const JoinRoomController: (
     }
     if (iterRes.value.getId() != USER.getId()) roomArray.push(iterRes.value);
   }
-  console.log(roomArray);
   socket.join(Room.getKey());
-  socket.emit("all-users", { users: roomArray });
+  socket.emit("all-users", roomArray);
   store.set(data.roomId, Room);
 };

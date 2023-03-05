@@ -24,7 +24,7 @@ export const sendingSignalController: (
   }
   io.to(data.userToSignal).emit("user-joined", {
     signal: data.signal,
-    callerID: data.callerId,
+    callerId: data.callerId,
     updatedUserList: roomArr,
   });
 };
