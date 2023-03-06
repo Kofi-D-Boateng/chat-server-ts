@@ -21,7 +21,7 @@ export const CONFIG = {
   RECURSIVE_ATTEMPTS: {
     CREATE_ROOM: 10,
   },
-  PATH: "/chat-socket/",
+  PATH: "/chat-socket",
 };
 
 export const API_VERSION = "api/v1";

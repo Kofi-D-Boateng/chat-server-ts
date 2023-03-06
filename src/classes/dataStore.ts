@@ -4,19 +4,17 @@
  * @author Kofi Boateng
  * This class is tasks with store members of a room
  *
+ * The DataStore Data Structure created here infuse two fundamental data structures, the hashtable and array.
+ * We will use the map to store the element-type T and its corresponding index in the array, while storing
+ * the actual elements in the array. I decided to go further with this structure in sure constant time lookup,
+ * inserts and deletes, in exchange for extra space. This data structure also guards against the off chance
+ * the hash table suffers from clustering and or other insertion collision that might turn the insert and
+ * look ups from constant to O(dependant), where dependant is the time complexity of the underlying data
+ * store (e.g array:n, Linked-List:n, Red-Black Tree:Log(n), etc).
  */
-
-// The DataStore Data Structure created here infuse two fundamental data structures, the hashtable and array.
-// We will use the map to store the element-type T and its corresponding index in the array, while storing
-// the actual elements in the array. I decided to go further with this structure in sure constant time lookup,
-// inserts and deletes, in exchange for extra space. This data structure also guards against the off chance
-// the hash table suffers from clustering and or other insertion collision that might turn the insert and
-// look ups from constant to O(dependant), where dependant is the time complexity of the underlying data
-// store (e.g array:n, Linked-List:n, Red-Black Tree:Log(n), etc).
-
 export class DataStore<T> {
-  _map: { [key: string]: number };
-  _array: T[];
+  private _map: { [key: string]: number };
+  private _array: T[];
   constructor() {
     this._map = {};
     this._array = [];
@@ -108,5 +106,12 @@ export class DataStore<T> {
       return null;
     }
     return this._array[this._map[stringifiedObj]];
+  }
+
+  *[Symbol.iterator]() {
+    for (const key in this._map) {
+      let pos = this._map[key];
+      yield this._array[pos];
+    }
   }
 }

@@ -16,14 +16,19 @@ import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { ReceivedSignalDatagram } from "./types/ReceivedSignal";
 import { MessageDatagram } from "./types/Message";
 import { DisconnectDatagram } from "./types/Disconnect";
-import { User } from "./classes/user";
-import { DataStore } from "./classes/dataStore";
+import { StoreCacheSingleton } from "./classes/storeSingleton";
 import router from "./routes/room";
+import { JoinRoomController } from "./socketControllers/joinRoomController";
+import { sendingSignalController } from "./socketControllers/sendingSignalController";
+import { returningSignalController } from "./socketControllers/returningSignalController";
+import { MessageController } from "./socketControllers/messageController";
+import { LeaveController } from "./socketControllers/leaveController";
 
 const app: Express = express();
+const store = StoreCacheSingleton.getStore();
 
 const whitelist: CorsOptions = {
-  origin: [CONFIG.ORIGINS],
+  origin: CONFIG.ORIGINS,
   credentials: true,
   optionsSuccessStatus: 204,
   methods: ["GET", "POST"],
@@ -49,87 +54,25 @@ io.on(
 
     socket.emit("myID", { ID: socket.id });
 
-    socket.on("join-room", async (data: JoinRoomDatagram) => {
-      const Room = await _searchForRoom(data.roomId);
-      if (!Room) {
-        io.to(socket.id).emit("room-status", { msg: "error" });
-        return;
-      }
+    socket.on("join-room", async (data: JoinRoomDatagram) =>
+      JoinRoomController(data, io, store, socket)
+    );
 
-      const DataStore: DataStore<User> = Room.store;
-      const USER: User = new User(socket.id, data.username);
-      DataStore.insert(USER);
-      const roomArray = DataStore.toArray().filter((User: User) => {
-        return User.id != USER.id;
-      });
-      socket.join(Room.key);
-      socket.emit("all-users", { users: roomArray });
-      _updateRoom(Room);
-    });
+    socket.on("sending-signal", async (data: ReceivedSignalDatagram) =>
+      sendingSignalController(data, io, store, socket)
+    );
 
-    socket.on("sending-signal", async (data: ReceivedSignalDatagram) => {
-      const Room = await _searchForRoom(data.roomID);
-      if (!Room) {
-        socket.emit("room-status", { msg: "error" });
-        return;
-      }
-      const roomArr = Room.store.toArray();
-      io.to(data.userToSignal).emit("user-joined", {
-        signal: data.signal,
-        callerID: data.callerID,
-        updatedUserList: roomArr,
-      });
-    });
+    socket.on("returning-signal", (data: ReceivedSignalDatagram) =>
+      returningSignalController(data, io, socket)
+    );
 
-    socket.on("returning-signal", (data: ReceivedSignalDatagram) => {
-      io.to(data.callerID).emit("receiving-signal", {
-        signal: data.signal,
-        id: socket.id,
-      });
-    });
+    socket.on("message", async (data: MessageDatagram) =>
+      MessageController(data, io, store, socket)
+    );
 
-    socket.on("message", async (data: MessageDatagram) => {
-      const Room = await _searchForRoom(data.room);
-      if (!Room) {
-        socket.emit("room-status", { msg: "error" });
-        return;
-      }
-      const DataStore = Room.store;
-      const USER: User = { id: socket.id, username: data.user.username };
-      const result = DataStore.contains(USER);
-      if (!result) return;
-      io.to(Room.key).emit("chat", {
-        message: data.user.message,
-        id: socket.id,
-        sender: USER.username,
-      });
-    });
-
-    socket.on("leave", async (data: DisconnectDatagram) => {
-      const Room = await _searchForRoom(data.room);
-      if (!Room) {
-        socket.emit("room-status", { msg: "error" });
-        return;
-      }
-      const DataStore = Room.store;
-      if (data.user.id !== socket.id) {
-        socket.emit("room-status", { msg: "error" });
-        return;
-      }
-      DataStore.remove(data.user);
-
-      if (DataStore.size() <= 0) {
-        _deleteRoomFromMemory(Room);
-        return;
-      }
-      const arr = DataStore.toArray();
-      socket.broadcast.emit("users-left", {
-        leaver: socket.id,
-        updatedList: arr,
-      });
-      _updateRoom(Room);
-      socket.disconnect(true);
-    });
+    socket.on("leave", async (data: DisconnectDatagram) =>
+      LeaveController(data, store, socket)
+    );
   }
 );
 

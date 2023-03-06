@@ -6,4 +6,5 @@ export interface List<T> {
   toArray(): Array<T>;
   size(): number;
   isEmpty(): boolean;
+  [Symbol.iterator](): Iterator<T>;
 }
