@@ -19,23 +19,18 @@ export const MessageController: (
   }
 
   if (!Room.getStore().has(socket.id)) return;
-  const processedMessage = processMessages({
+  const processedMessage: Message = {
     id: socket.id,
     sender: data.user.username,
     text: data.user.message,
     createdAt: Date.now(),
-  });
-  if (processedMessage) {
-    Room.insertMessage(processedMessage);
-    store.set(data.roomId, Room);
-
-    io.to(Room.getKey()).emit("chat", processedMessage);
-  }
+  };
+  Room.insertMessage(processedMessage);
+  store.set(data.roomId, Room);
+  io.to(Room.getKey()).emit("chat", processedMessage);
 };
 
-export const processMessages: (message: Message) => Message | null = (
-  message
-) => {
+const processMessages: (message: Message) => Message | null = (message) => {
   console.log(message);
   const worker = new Worker(
     "C:/Users/kdboa/OneDrive/Desktop/chat-server-ts/src/workerThreadScripts/processMessage.ts",

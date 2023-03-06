@@ -15,13 +15,9 @@ export const sendingSignalController: (
     socket.emit("room-status", { msg: "error" });
     return;
   }
-  const iter = Room.getStore().values();
+
   const roomArr: Array<User> = new Array();
-  while (true) {
-    const res = iter.next();
-    if (res.done) break;
-    roomArr.push(iter.next().value);
-  }
+  Room.getStore().forEach((user: User, key: string) => roomArr.push(user));
   io.to(data.userToSignal).emit("user-joined", {
     signal: data.signal,
     callerId: data.callerId,

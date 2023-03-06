@@ -19,16 +19,12 @@ export const JoinRoomController: (
   const DataStore = Room.getStore();
   const USER: User = new User(socket.id, data.username, new Set<Message>());
   DataStore.set(socket.id, USER);
-  const userIter: IterableIterator<User> = DataStore.values();
   const roomArray: Array<User> = new Array();
-  while (true) {
-    const iterRes = userIter.next();
-    if (iterRes.done) {
-      break;
-    }
-    if (iterRes.value.getId() != USER.getId()) roomArray.push(iterRes.value);
-  }
+  DataStore.forEach((user: User, key: string) => roomArray.push(user));
   socket.join(Room.getKey());
-  socket.emit("all-users", roomArray);
+  socket.emit(
+    "all-users",
+    roomArray.filter((user) => user.getId() != USER.getId())
+  );
   store.set(data.roomId, Room);
 };

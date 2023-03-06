@@ -7,7 +7,6 @@ export const returningSignalController: (
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
   socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
 ) => void = (data, io, socket) => {
-  console.log(data);
   io.to(data.callerId).emit("received-signal", {
     signal: data.signal,
     id: socket.id,
