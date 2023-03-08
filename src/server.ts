@@ -1,4 +1,3 @@
-import "dotenv/config";
 import cors, { CorsOptions } from "cors";
 import express, { Express } from "express";
 import { createServer, Server } from "http";
